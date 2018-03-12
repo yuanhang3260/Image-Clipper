@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Test ImmageClipper</title>
+</head>
+
+<body>
+
+<button type="button" class="btn btn-light" data-toggle="modal" data-target="#exampleModal">
+  Launch demo modal
+</button>
+
+<div class="modal image-clipper-box" id="exampleModal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Please Select Image</h5>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <div class="custom-file">
+            <input type="file" class="custom-file-input file-select-input">
+            <label class="custom-file-label">Choose File</label>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas class="image-blur" width="500" height="300"></canvas>
+          <canvas class="image-clip" width="500" height="300"></canvas>
+          <canvas class="clip-container" width="500" height="300"></canvas>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success btn-submit">Submit</button>
+        <button type="button" class="btn btn-secondary btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
