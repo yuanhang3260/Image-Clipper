@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import ImageClipper from "./image-clipper.js"
 
-var clipper = new ImageClipper(function() {
+var clipper = new ImageClipper(function(data) {
   console.log("image submitted");
 });
 
