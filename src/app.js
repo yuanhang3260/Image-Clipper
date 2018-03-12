@@ -1,6 +1,12 @@
 import $ from 'jquery'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import popups from "./image-clipper.js"
+import ImageClipper from "./image-clipper.js"
 
-$("#exampleModal").modal("show");
+var clipper = new ImageClipper(function() {
+  console.log("image submitted");
+});
+
+$("#upload-image").click(function() {
+  clipper.open();
+});
