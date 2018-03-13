@@ -7,7 +7,7 @@ const baseWebpackConfig = require('./webpack.base.conf');
 
 exports.default = merge(baseWebpackConfig, {
   entry: {
-    immage-clipper: './src/immage-clipper.js',
+    "image-clipper": './src/image-clipper.js',
   },
 
   output: {

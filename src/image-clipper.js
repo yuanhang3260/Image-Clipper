@@ -1,5 +1,6 @@
 import $ from "jquery";
 import "bootstrap";
+import b64ToBlob from "b64-to-blob"
 
 import "./css/image-clipper.scss";
 import "./css/fonts.css";
@@ -12,7 +13,7 @@ var $box = $(
     '<div class="modal-dialog">' +
       '<div class="modal-content">' +
         '<div class="modal-header">' +
-          '<h5 class="modal-title">Please Select Image</h5>' +
+          '<h5 class="modal-title"></h5>' +
         '</div>' +
         '<div class="modal-body">' +
           '<div class="input-group">' +
@@ -37,23 +38,34 @@ var $box = $(
   '</div>'
 );
 
-function ImageClipper(task) {
+function ImageClipper(title, task) {
+  if (Object.prototype.toString.call(title) === "[object String]") {
+    this.title = title;
+    this.task = task || (function() {});
+  } else if (Object.prototype.toString.call(title) === "[object Function]") {
+    this.title = "Please Select Image";
+    this.task = title;
+  } else {
+    this.title = "Please Select Image";
+    this.task = (function() {});
+  }
+
   this.box = $box;
-  this.task = task || (function() {});
   this.initialized = false;
 }
 
 ImageClipper.prototype.open = function() {
   this.box.modal("show");
-  this.Init();
+
+  if (!this.initialized) {
+    this.Init();
+    this.initialized = true;
+  }
 }
 
 ImageClipper.prototype.Init = function() {
-  if (this.initialized) {
-    return;
-  }
-
   var $title = $box.find(".modal-title");
+  $title.html(this.title || "Please Select Image");
 
   // Input form.
   var $form = $box.find(".input-group");
@@ -65,17 +77,7 @@ ImageClipper.prototype.Init = function() {
   var $submitBtn = $box.find("button.btn-submit");
   var $errMsg = $box.find("div.err-msg");
 
-  $cancelBtn.click(function() {
-    $box.modal("hide");
-    resetAll();
-  });
-
   var me = this;
-  $submitBtn.click(function() {
-    me.task();
-    $box.modal("hide");
-    resetAll();
-  });
 
   function resetAll() {
     image = null;
@@ -93,7 +95,7 @@ ImageClipper.prototype.Init = function() {
     $submitBtn.hide();
     $errMsg.html(null).hide();
 
-    $title.html("Please Select Image");
+    $title.html(me.title || "Please Select Image");
     $inputLabel.html("Choose File");
 
     // Clear canvases
@@ -106,9 +108,37 @@ ImageClipper.prototype.Init = function() {
     $input.val(null);
   }
 
-  // ------------------------------------------------------------------------ //
-  // ------------------------ Clip Image with Canvas ------------------------ //
-  // ------------------------------------------------------------------------ //
+  $cancelBtn.click(function() {
+    $box.modal("hide");
+    resetAll();
+  });
+
+  $submitBtn.click(function() {
+    // Get clipped image data and put it into a fresh new canvas with exactly
+    // the size of clip area.
+    var imageData = contextClip.getImageData(clipStartX, clipStartY,
+                                             clipLength, clipLength);
+
+    var canvas = document.createElement("canvas");
+    // Make some fine adjustment for sizes and painting offset to remove
+    // boundary white space.
+    canvas.width = clipLength - 1;
+    canvas.height = clipLength - 1;
+    var ctx = canvas.getContext("2d");
+    ctx.putImageData(imageData, -1, -1);
+
+    var data = canvas.toDataURL();
+    // Convert base64 data to bytes.
+    var blob = b64ToBlob(data.split(",")[1], "image/png");
+    me.task($input.val(), blob);
+
+    $box.modal("hide");
+    resetAll();
+  });
+
+  // ---------------------------------------------------------------------- //
+  // ------------------------ Clip Image with Canvas ---------------------- //
+  // ---------------------------------------------------------------------- //
   // Canvases.
   var $canvasContainer = $box.find(".canvas-container");
 
