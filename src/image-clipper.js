@@ -13,19 +13,36 @@ var $box = $(
     '<div class="modal-dialog">' +
       '<div class="modal-content">' +
         '<div class="modal-header">' +
-          '<h5 class="modal-title"></h5>' +
+          '<h5 class="modal-title select-page-title"></h5>' +
+          '<div class="edit-page-title-container">' +
+            '<h5 class="modal-title edit-page-title crop-tab crop-tab-selected">' +
+              '<span>Crop</span>' +
+              '<i class="icon-crop-hy"></i>' +
+            '</h5>' +
+            '<h5 class="modal-title edit-page-title preview-tab">' +
+              '<span>Preview</span>' +
+              '<i class="icon-camera-hy"></i>' +
+            '</h5>' +
+          '</div>' +
         '</div>' +
         '<div class="modal-body">' +
-          '<div class="input-group">' +
-            '<div class="custom-file">' +
-              '<input type="file" class="custom-file-input file-select-input">' +
-              '<label class="custom-file-label">Choose File</label>' +
-            '</div>' +
+          '<div class="select-file">' +
+            '<label class="custom-file">' +
+              '<div class="label-content-container">' +
+                '<i class="icon-upload2-hy"></i>' +
+                '<span class="label-text">Upload Image</span>' +
+              '</div>' +
+              '<input type="file" class="file-select-input">' +
+            '</label>' +
           '</div>' +
           '<div class="canvas-container">' +
             '<canvas class="image-blur" width="500" height="300"></canvas>' +
             '<canvas class="image-clip" width="500" height="300"></canvas>' +
             '<canvas class="clip-container" width="500" height="300"></canvas>' +
+          '</div>' +
+          '<div class="preview-container">' +
+            '<canvas class="image-blur" width="0" height="0"></canvas>' +
+            '<canvas class="image-clip" width="0" height="0"></canvas>' +
           '</div>' +
         '</div>' +
         '<div class="modal-footer">' +
@@ -64,13 +81,14 @@ ImageClipper.prototype.open = function() {
 }
 
 ImageClipper.prototype.Init = function() {
-  var $title = $box.find(".modal-title");
-  $title.html(this.title || "Please Select Image");
+  var $selectPageTitle = $box.find(".select-page-title");
+  $selectPageTitle.html(this.title || "Please Select Image");
+  var $editPageTitle = $box.find(".edit-page-title-container");
 
   // Input form.
-  var $form = $box.find(".input-group");
+  var $form = $box.find(".select-file");
   var $input = $form.find(".file-select-input");
-  var $inputLabel = $form.find(".custom-file-label");
+  var $inputLabel = $form.find(".label-context");
 
   // Footer - buttons and err message.
   var $cancelBtn = $box.find("button.btn-cancel");
@@ -91,11 +109,15 @@ ImageClipper.prototype.Init = function() {
     minClipLength = null;
 
     $form.show();
+    $cropTab.addClass("crop-tab-selected");
     $canvasContainer.hide();
+    $previewTab.removeClass("preview-tab-selected");
+    $previewContainer.hide();
     $submitBtn.hide();
     $errMsg.html(null).hide();
 
-    $title.html(me.title || "Please Select Image");
+    $editPageTitle.hide();
+    $selectPageTitle.show();
     $inputLabel.html("Choose File");
 
     // Clear canvases
@@ -139,8 +161,15 @@ ImageClipper.prototype.Init = function() {
   // ---------------------------------------------------------------------- //
   // ------------------------ Clip Image with Canvas ---------------------- //
   // ---------------------------------------------------------------------- //
-  // Canvases.
+  // Crop Tab.
+  var $cropTab = $box.find(".crop-tab");
   var $canvasContainer = $box.find(".canvas-container");
+  $cropTab.click(function() {
+    $cropTab.addClass("crop-tab-selected");
+    $canvasContainer.show();
+    $previewTab.removeClass("preview-tab-selected");
+    $previewContainer.hide();
+  });
 
   // Draw a blurred image background.
   var $canvas = $canvasContainer.find("canvas.image-blur");
@@ -158,6 +187,16 @@ ImageClipper.prototype.Init = function() {
   var $canvasClipContainer = $("canvas.clip-container");
   var canvasClipContainer = $canvasClipContainer[0];
   var contextClipContainer = canvasClipContainer.getContext("2d");
+
+  // Preview Tab
+  var $previewTab = $box.find(".preview-tab");
+  var $previewContainer = $box.find(".preview-container");
+  $previewTab.click(function() {
+    $previewTab.addClass("preview-tab-selected");
+    $previewContainer.show();
+    $cropTab.removeClass("crop-tab-selected");
+    $canvasContainer.hide();
+  });
 
   // Image.
   var image = null;
@@ -199,9 +238,8 @@ ImageClipper.prototype.Init = function() {
                             drawOpts.width, drawOpts.height);
           $form.hide();
           $canvasContainer.show();
-          $title.html(null)
-                .append($("<span>").html("Edit Image"))
-                .append($('<i class="icon-crop-hy">'));
+          $selectPageTitle.hide();
+          $editPageTitle.show();
           $errMsg.html(null).hide()
           $submitBtn.show();
         } catch(err) {
