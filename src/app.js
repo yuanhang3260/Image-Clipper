@@ -3,9 +3,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import ImageClipper from "./image-clipper.js"
 
-var clipper = new ImageClipper("Update Profile Image", callback);
+var clipper = new ImageClipper({
+  title: "Update Profile Image",
+  maxFileSize: 1024 * 1024,  // 1.0 MB
+  callback: uploadImage,
+});
 
-function callback(blob) {
+function uploadImage(blob) {
   // Do something with the image blob.
   // e.g. send an AJAX to upload the image.
   // ...

@@ -41,8 +41,14 @@ var $box = $(
             '<canvas class="clip-container" width="500" height="300"></canvas>' +
           '</div>' +
           '<div class="preview-container">' +
-            '<canvas class="image-blur" width="0" height="0"></canvas>' +
-            '<canvas class="image-clip" width="0" height="0"></canvas>' +
+            '<div class="preview-container-inner">' +
+              '<div class="square-preview">' +
+                '<canvas class="preview-canvas preview-canvas-square" width="165" height="165"></canvas>' +
+              '</div>' +
+              '<div class="circle-preview">' +
+                '<canvas class="preview-canvas preview-canvas-circle" width="165" height="165"></canvas>' +
+              '</div>' +
+            '</div>' +    
           '</div>' +
         '</div>' +
         '<div class="modal-footer">' +
@@ -55,17 +61,15 @@ var $box = $(
   '</div>'
 );
 
-function ImageClipper(title, task) {
-  if (Object.prototype.toString.call(title) === "[object String]") {
-    this.title = title;
-    this.task = task || (function() {});
-  } else if (Object.prototype.toString.call(title) === "[object Function]") {
-    this.title = "Please Select Image";
-    this.task = title;
+function ImageClipper(config) {
+  this.title = config.title || "Please Select Image";
+  this.maxFileSize = config.maxFileSize || (5 * 1024 * 1024);  // 5MB
+  if (isValidOutputFormmat(config.outputFormmat)) {
+    this.outputFormmat = config.outputFormmat;
   } else {
-    this.title = "Please Select Image";
-    this.task = (function() {});
+    this.outputFormmat = "png";
   }
+  this.task = config.callback || (function() {});
 
   this.box = $box;
   this.initialized = false;
@@ -136,22 +140,36 @@ ImageClipper.prototype.Init = function() {
   });
 
   $submitBtn.click(function() {
-    // Get clipped image data and put it into a fresh new canvas with exactly
-    // the size of clip area.
-    var imageData = contextClip.getImageData(clipStartX, clipStartY,
-                                             clipLength, clipLength);
+    var imageStartX = (clipStartX - drawOpts.startX) / drawOpts.scale;
+    var imageStartY = (clipStartY - drawOpts.startY) / drawOpts.scale;
+    var imageCutLength = clipLength / drawOpts.scale;
 
     var canvas = document.createElement("canvas");
-    // Make some fine adjustment for sizes and painting offset to remove
-    // boundary white space.
-    canvas.width = clipLength - 1;
-    canvas.height = clipLength - 1;
+    canvas.width = imageCutLength;
+    canvas.height = imageCutLength;
     var ctx = canvas.getContext("2d");
-    ctx.putImageData(imageData, -1, -1);
 
-    var data = canvas.toDataURL();
+    // We draw from original image to this canvas. 
+    ctx.drawImage(image, imageStartX, imageStartY,
+                  imageCutLength, imageCutLength,
+                  0, 0, imageCutLength, imageCutLength);
+
+    // // This is another way: Just get image data from clipper canvas, but this
+    // // can lose original image data.
+    // //
+    // // Get clipped image data and put it into a fresh new canvas with exactly
+    // // the size of clip area.
+    // var imageData = contextClip.getImageData(clipStartX, clipStartY,
+    //                                          clipLength, clipLength);
+    // // Make some fine adjustment for sizes and painting offset to remove
+    // // boundary white space.
+    // canvas.width = clipLength - 1;
+    // canvas.height = clipLength - 1;
+    // ctx.putImageData(imageData, -1, -1);
+
+    var data = canvas.toDataURL("image/" + me.outputFormmat);
     // Convert base64 data to bytes.
-    var blob = b64ToBlob(data.split(",")[1], "image/png");
+    var blob = b64ToBlob(data.split(",")[1], "image/" + me.outputFormmat);
     me.task($input.val(), blob);
 
     $box.modal("hide");
@@ -196,7 +214,18 @@ ImageClipper.prototype.Init = function() {
     $previewContainer.show();
     $cropTab.removeClass("crop-tab-selected");
     $canvasContainer.hide();
+    drawPreviews();
   });
+
+  // Square preview
+  var $canvasSqurePreivew = $("canvas.preview-canvas-square");
+  var canvasSqurePreivew = $canvasSqurePreivew[0];
+  var contextSqurePreivew = canvasSqurePreivew.getContext("2d");
+
+  // Square preview
+  var $circleSqurePreivew = $("canvas.preview-canvas-circle");
+  var circleSqurePreivew = $circleSqurePreivew[0];
+  var contextCirclePreivew = circleSqurePreivew.getContext("2d");
 
   // Image.
   var image = null;
@@ -218,6 +247,12 @@ ImageClipper.prototype.Init = function() {
     }
 
     var file = this.files[0];
+    if (file.size > me.maxFileSize) {
+      $errMsg.html(
+          "File size over limit " + friendlyFileSize(me.maxFileSize)).show();
+      return;
+    }
+
     $inputLabel.html(file.name);
 
     image = new Image();
@@ -520,6 +555,48 @@ ImageClipper.prototype.Init = function() {
                           clipLength, clipLength);
   }
 
+  var kPreviePadding = 6;
+  function drawPreviews() {
+    var imageStartX = (clipStartX - drawOpts.startX) / drawOpts.scale;
+    var imageStartY = (clipStartY - drawOpts.startY) / drawOpts.scale;
+    var imageCutLength = clipLength / drawOpts.scale;
+
+    var previewSize = canvasSqurePreivew.width;
+
+    // Draw square preview.
+    contextSqurePreivew.clearRect(0, 0, previewSize, previewSize);
+    contextSqurePreivew.lineWidth = 3;
+    contextSqurePreivew.strokeStyle = "#ccc";
+    contextSqurePreivew.strokeRect(0, 0, previewSize, previewSize);
+    contextSqurePreivew.drawImage(image, imageStartX, imageStartY,
+                                  imageCutLength, imageCutLength,
+                                  kPreviePadding, kPreviePadding,
+                                  previewSize - 2 * kPreviePadding,
+                                  previewSize - 2 * kPreviePadding);
+
+    // Draw circle preview.
+    var padding = kPreviePadding - 1;
+    contextCirclePreivew.clearRect(0, 0, previewSize, previewSize);
+    contextCirclePreivew.beginPath();
+    contextCirclePreivew.arc(previewSize / 2, previewSize / 2,
+                             previewSize / 2 - 1, 0, 2 * Math.PI);
+    contextCirclePreivew.lineWidth = 1.5;
+    contextCirclePreivew.strokeStyle = "#c7c7c7";
+    contextCirclePreivew.stroke();
+
+    contextCirclePreivew.beginPath();
+    contextCirclePreivew.arc(previewSize / 2, previewSize / 2,
+                             previewSize / 2 - 1 - padding, 0, 2 * Math.PI);
+    contextCirclePreivew.lineWidth = 0;
+    contextCirclePreivew.strokeStyle = "white";
+    contextCirclePreivew.clip();    
+    contextCirclePreivew.drawImage(image, imageStartX, imageStartY,
+                                   imageCutLength, imageCutLength,
+                                   padding, padding,
+                                   previewSize - 2 * padding,
+                                   previewSize - 2 * padding);
+  }
+
   function drawClipContainer() {
     contextClipContainer.clearRect(
         0, 0, canvasClipContainer.width, canvasClipContainer.height);
@@ -574,6 +651,20 @@ ImageClipper.prototype.Init = function() {
 
   this.initialized = true;
 
+  function friendlyFileSize(byteSize) {
+    if (byteSize < 1024) {
+      return byteSize + " B";
+    } else if (byteSize < 1048576) {
+      return (byteSize / 1024).toFixed(1) + " KB";
+    } else {
+      return (byteSize / 1048576).toFixed(1) + " MB";
+    }
+  }
+
+}
+
+function isValidOutputFormmat(formmat) {
+  return formmat === "png" || formmat === "jpeg" || formmat === "bmp";
 }
 
 export default ImageClipper;
