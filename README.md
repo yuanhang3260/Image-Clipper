@@ -29,18 +29,18 @@ clipper.open();
 ```
 
 #### Config
-`ImageClipper` constructor accepts a config which has the following attributes.
+`ImageClipper` constructor accepts a config with the following attributes.
 
 |   Attribute   |                Description                    |    Type    |
 | :-----------: | --------------------------------------------- | :--------: |
 | title         | If set, will be used as the dialog box title. |  string    |
 | maxFileSize   | Maximun upload file size in Bytes.            |  int       |
-| outputFormmat | Output image formmat ("png", "jpeg", "bmp").  |  string    |
+| outputFormmat | Output image formmat (`png`, `jpeg`, `bmp`).  |  string    |
 | callback      | Callback to process image data.               |  function  |
 
-The config `callback` takes an argument`blob`, which is a Blob object of the cropped image area. Once`submit` button is clicked, this callback will be executed. Typically this callback should make an user-defined AJAX call to backend server.
+The `callback` is of type `function(blob)`, which takes a Blob object of the cropped image area. Once`submit` button is clicked, this callback will be executed. Typically it should make a user-defined AJAX call to backend server.
 
-Call `clipper.open()`, and a popup dialog will show to select image file. The box title is set by the first argument of `ImmageClipper` constructor, which is "Update Profile Image" in the above example code.
+Call `clipper.open()`, and a popup dialog will show to select image. The box title is set by `config.title` of `ImmageClipper` constructor, which is "Update Profile Image" in the above example code.
 
 <img src="https://raw.githubusercontent.com/yuanhang3260/Image-Clipper/master/samples/select.png" alt="example2" width="550px"/>
 
