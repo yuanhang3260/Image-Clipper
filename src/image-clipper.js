@@ -38,7 +38,6 @@ var $box = $(
           '<div class="canvas-container">' +
             '<canvas class="image-blur" width="500" height="300"></canvas>' +
             '<canvas class="image-clip" width="500" height="300"></canvas>' +
-            '<canvas class="clip-container" width="500" height="300"></canvas>' +
           '</div>' +
           '<div class="preview-container">' +
             '<div class="preview-container-inner">' +
@@ -127,8 +126,6 @@ ImageClipper.prototype.Init = function() {
     // Clear canvases
     context.clearRect(0, 0, canvas.width, canvas.height);
     contextClip.clearRect(0, 0, canvasClip.width, canvasClip.height);
-    contextClipContainer.clearRect(
-        0, 0, contextClipContainer.width, contextClipContainer.height);
 
     // Clear input value.
     $input.val(null);
@@ -153,19 +150,6 @@ ImageClipper.prototype.Init = function() {
     ctx.drawImage(image, imageStartX, imageStartY,
                   imageCutLength, imageCutLength,
                   0, 0, imageCutLength, imageCutLength);
-
-    // // This is another way: Just get image data from clipper canvas, but this
-    // // can lose original image data.
-    // //
-    // // Get clipped image data and put it into a fresh new canvas with exactly
-    // // the size of clip area.
-    // var imageData = contextClip.getImageData(clipStartX, clipStartY,
-    //                                          clipLength, clipLength);
-    // // Make some fine adjustment for sizes and painting offset to remove
-    // // boundary white space.
-    // canvas.width = clipLength - 1;
-    // canvas.height = clipLength - 1;
-    // ctx.putImageData(imageData, -1, -1);
 
     var data = canvas.toDataURL("image/" + me.outputFormmat);
     // Convert base64 data to bytes.
@@ -199,12 +183,6 @@ ImageClipper.prototype.Init = function() {
   var $canvasClip = $canvasContainer.find("canvas.image-clip");
   var canvasClip = $canvasClip[0];
   var contextClip = canvasClip.getContext("2d");
-
-  // Clip container is a virtual container. It just shows the border of clip
-  // area, rather than really "containing" clip canvas.
-  var $canvasClipContainer = $("canvas.clip-container");
-  var canvasClipContainer = $canvasClipContainer[0];
-  var contextClipContainer = canvasClipContainer.getContext("2d");
 
   // Preview Tab
   var $previewTab = $box.find(".preview-tab");
@@ -263,8 +241,6 @@ ImageClipper.prototype.Init = function() {
       setTimeout(function() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         contextClip.clearRect(0, 0, canvasClip.width, canvasClip.height);
-        contextClipContainer.clearRect(
-            0, 0, contextClipContainer.width, contextClipContainer.height);
 
         drawOpts = computeDrawOptions();
 
@@ -301,7 +277,6 @@ ImageClipper.prototype.Init = function() {
     }
     minClipLength = clipLength / 3;
     drawClipImage();
-    drawClipContainer();
   }
 
   function refreshClipArea(x, y, L) {
@@ -313,7 +288,6 @@ ImageClipper.prototype.Init = function() {
     clipStartY = y;
     clipLength = L;
     drawClipImage();
-    drawClipContainer();
   }
 
   function computeDrawOptions() {
@@ -408,15 +382,15 @@ ImageClipper.prototype.Init = function() {
   var mouseStartY = 0;
   var drag = null;
 
-  $canvasClipContainer.on("mousedown", function(e) {
+  $canvasClip.on("mousedown", function(e) {
     e.stopPropagation();
     if (!imageLoaded) {
       return;
     }
 
     mouseClicked = true;
-    var x = mouseStartX = e.clientX - $canvasClipContainer.offset().left;
-    var y = mouseStartY = e.clientY - $canvasClipContainer.offset().top;
+    var x = mouseStartX = e.clientX - $canvasClip.offset().left;
+    var y = mouseStartY = e.clientY - $canvasClip.offset().top;
 
     if (atTopLeftCorner(x, y)) {
       drag = DragType.TOPLEFT;
@@ -433,7 +407,7 @@ ImageClipper.prototype.Init = function() {
     }
   });
 
-  $canvasClipContainer.on("mousemove", mousemoveHandler);
+  $canvasClip.on("mousemove", mousemoveHandler);
 
   function mousemoveHandler(e) {
     e.stopPropagation();
@@ -441,21 +415,21 @@ ImageClipper.prototype.Init = function() {
       return;
     }
 
-    var x = e.clientX - $canvasClipContainer.offset().left;
-    var y = e.clientY - $canvasClipContainer.offset().top;
+    var x = e.clientX - $canvasClip.offset().left;
+    var y = e.clientY - $canvasClip.offset().top;
     if (!mouseClicked) {
       if (atTopLeftCorner(x, y)) {
-        $canvasClipContainer.css("cursor", "nw-resize");
+        $canvasClip.css("cursor", "nw-resize");
       } else if (atTopRightCorner(x, y)) {
-        $canvasClipContainer.css("cursor", "ne-resize");
+        $canvasClip.css("cursor", "ne-resize");
       } else if (atBottomRightCorner(x, y)) {
-        $canvasClipContainer.css("cursor", "se-resize");
+        $canvasClip.css("cursor", "se-resize");
       } else if (atBottomLeftCorner(x, y)) {
-        $canvasClipContainer.css("cursor", "sw-resize");
+        $canvasClip.css("cursor", "sw-resize");
       } else if (inClipArea(x, y)) {
-        $canvasClipContainer.css("cursor", "move");
+        $canvasClip.css("cursor", "move");
       } else {
-        $canvasClipContainer.css("cursor", "default");
+        $canvasClip.css("cursor", "default");
       }
     }
 
@@ -520,7 +494,7 @@ ImageClipper.prototype.Init = function() {
     mouseClicked = false;
   }
 
-  $canvasClipContainer.on("mouseup", mouseupHandler);
+  $canvasClip.on("mouseup", mouseupHandler);
 
   // Mouse event from outside box to canvas.
   $box.on("mouseup", function(e) {
@@ -553,6 +527,38 @@ ImageClipper.prototype.Init = function() {
                           imageCutLength, imageCutLength,
                           clipStartX, clipStartY,
                           clipLength, clipLength);
+
+    drawClipContainer();
+  }
+
+  function drawClipContainer() {
+    contextClip.lineWidth = 3;
+
+    var diagnal = getClipDiagnoal();
+
+    contextClip.beginPath();
+    contextClip.moveTo(diagnal.x1 + kCornerArrowLength, diagnal.y1);
+    contextClip.lineTo(diagnal.x1, diagnal.y1);
+    contextClip.lineTo(diagnal.x1, diagnal.y1 + kCornerArrowLength);
+    contextClip.stroke();
+
+    contextClip.beginPath();
+    contextClip.moveTo(diagnal.x2 - kCornerArrowLength, diagnal.y1);
+    contextClip.lineTo(diagnal.x2, diagnal.y1);
+    contextClip.lineTo(diagnal.x2, diagnal.y1 + kCornerArrowLength);
+    contextClip.stroke();
+
+    contextClip.beginPath();
+    contextClip.moveTo(diagnal.x2 - kCornerArrowLength, diagnal.y2);
+    contextClip.lineTo(diagnal.x2, diagnal.y2);
+    contextClip.lineTo(diagnal.x2, diagnal.y2 - kCornerArrowLength);
+    contextClip.stroke();
+
+    contextClip.beginPath();
+    contextClip.moveTo(diagnal.x1 + kCornerArrowLength, diagnal.y2);
+    contextClip.lineTo(diagnal.x1, diagnal.y2);
+    contextClip.lineTo(diagnal.x1, diagnal.y2 - kCornerArrowLength);
+    contextClip.stroke();
   }
 
   var kPreviePadding = 6;
@@ -595,38 +601,6 @@ ImageClipper.prototype.Init = function() {
                                    padding, padding,
                                    previewSize - 2 * padding,
                                    previewSize - 2 * padding);
-  }
-
-  function drawClipContainer() {
-    contextClipContainer.clearRect(
-        0, 0, canvasClipContainer.width, canvasClipContainer.height);
-    contextClipContainer.lineWidth = 3;
-
-    var diagnal = getClipDiagnoal();
-
-    contextClipContainer.beginPath();
-    contextClipContainer.moveTo(diagnal.x1 + kCornerArrowLength, diagnal.y1);
-    contextClipContainer.lineTo(diagnal.x1, diagnal.y1);
-    contextClipContainer.lineTo(diagnal.x1, diagnal.y1 + kCornerArrowLength);
-    contextClipContainer.stroke();
-
-    contextClipContainer.beginPath();
-    contextClipContainer.moveTo(diagnal.x2 - kCornerArrowLength, diagnal.y1);
-    contextClipContainer.lineTo(diagnal.x2, diagnal.y1);
-    contextClipContainer.lineTo(diagnal.x2, diagnal.y1 + kCornerArrowLength);
-    contextClipContainer.stroke();
-
-    contextClipContainer.beginPath();
-    contextClipContainer.moveTo(diagnal.x2 - kCornerArrowLength, diagnal.y2);
-    contextClipContainer.lineTo(diagnal.x2, diagnal.y2);
-    contextClipContainer.lineTo(diagnal.x2, diagnal.y2 - kCornerArrowLength);
-    contextClipContainer.stroke();
-
-    contextClipContainer.beginPath();
-    contextClipContainer.moveTo(diagnal.x1 + kCornerArrowLength, diagnal.y2);
-    contextClipContainer.lineTo(diagnal.x1, diagnal.y2);
-    contextClipContainer.lineTo(diagnal.x1, diagnal.y2 - kCornerArrowLength);
-    contextClipContainer.stroke();
   }
 
   // Get the diagnal of clip area from top-left to bottom-right.
