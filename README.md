@@ -2,9 +2,16 @@
 
 An image clipper tool built with HTML5 `canvas` and BootStrap `Modal` component.
 
-#### Example
+#### Demo
+Click [here](https://yuanhang3260.github.io/Image-Clipper/)
+
+#### Crop Image
 
 <img src="https://raw.githubusercontent.com/yuanhang3260/Image-Clipper/master/samples/clipper.png" alt="example2" width="600px"/>
+
+#### Preview
+
+<img src="https://raw.githubusercontent.com/yuanhang3260/Image-Clipper/master/samples/preview.png" alt="example3" width="600px"/>
 
 #### Usage
 ```javascript
@@ -39,12 +46,3 @@ clipper.open();
 | callback      | Callback to process image data.               |  function  |
 
 The `callback` is of type `function(blob)`, which takes a Blob object of the cropped image area. Once`submit` button is clicked, this callback will be executed. Typically it should make a user-defined AJAX call to backend server.
-
-Call `clipper.open()`, and a popup dialog will show to select image. The box title is set by `config.title` of `ImmageClipper` constructor, which is "Update Profile Image" in the above example code.
-
-<img src="https://raw.githubusercontent.com/yuanhang3260/Image-Clipper/master/samples/select.png" alt="example2" width="550px"/>
-
-#### Preview
-Crop the image and you can preview it:
-
-<img src="https://raw.githubusercontent.com/yuanhang3260/Image-Clipper/master/samples/preview.png" alt="example3" width="550px"/>
