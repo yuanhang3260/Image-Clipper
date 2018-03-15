@@ -60,3 +60,6 @@ function uploadImage(blob) {
   });
 }
 ```
+
+#### License
+[MIT](https://github.com/yuanhang3260/Image-Clipper/blob/master/LICENSE)
