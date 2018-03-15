@@ -9,7 +9,7 @@ import "./css/fonts.css";
 // ------------------------------ Dialog Box -------------------------------- //
 // -------------------------------------------------------------------------- //
 var $box = $(
-  '<div class="modal image-clipper-box" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">' +
+  '<div class="modal image-clipper-box-hy" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">' +
     '<div class="modal-dialog">' +
       '<div class="modal-content">' +
         '<div class="modal-header">' +

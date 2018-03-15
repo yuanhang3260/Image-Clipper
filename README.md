@@ -27,8 +27,6 @@ function uploadImage(blob) {
   // Do something with the image blob.
   // e.g. send an AJAX to upload the image.
   // ...
-
-  console.log("image submitted");
 }
 
 clipper.open();
@@ -44,4 +42,21 @@ clipper.open();
 | outputFormmat | Output image formmat (`png`, `jpeg`, `bmp`).  |  string    |
 | callback      | Callback to process image data.               |  function  |
 
-The `callback` is of type `function(blob)`, which takes a Blob object of the cropped image area. Once`submit` button is clicked, this callback will be executed. Typically it should make a user-defined AJAX call to backend server.
+The `callback` is of type `function(blob)`, which takes a Blob object of the cropped image area. Once`submit` button is clicked, this callback will be executed. Typically it should make a user-defined AJAX call to backend server:
+
+```javascript
+function uploadImage(blob) {
+  var formData = new FormData();
+  formData.append("imagedata", blob);
+
+  $.ajax({
+    type: "POST",
+    url: "xxx",
+    data: formData,
+    processData: false,
+    contentType: false,
+  }).done(function(data) {
+    // ...
+  });
+}
+```
