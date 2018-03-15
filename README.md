@@ -2,8 +2,7 @@
 
 An image clipper tool built with HTML5 `canvas` and BootStrap `Modal` component.
 
-#### Demo
-Click [here](https://yuanhang3260.github.io/Image-Clipper/)
+Here is [demo](https://yuanhang3260.github.io/Image-Clipper/).
 
 #### Crop Image
 
