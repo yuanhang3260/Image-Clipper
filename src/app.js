@@ -5,7 +5,7 @@ import ImageClipper from "./image-clipper.js"
 
 var clipper = new ImageClipper({
   title: "Update Profile Image",
-  maxFileSize: 1024 * 1024,  // 1.0 MB
+  maxFileSize: 5 * 1024 * 1024,  // 5.0 MB
   callback: uploadImage,
 });
 
