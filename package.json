@@ -1,6 +1,6 @@
 {
   "name": "image-clip-tool",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "An image crop and upload plugin",
   "main": "index.js",
   "scripts": {
