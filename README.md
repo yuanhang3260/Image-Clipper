@@ -15,7 +15,7 @@ Here is [demo](https://yuanhang3260.github.io/Image-Clipper/).
 #### Usage
 ```javascript
 import 'bootstrap/dist/css/bootstrap.min.css';
-import ImageClipper from "./image-clipper.js"
+import ImageClipper from "image-clip-tool"
 
 var clipper = new ImageClipper({
   title: "Update Profile Image",

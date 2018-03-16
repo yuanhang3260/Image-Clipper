@@ -2,7 +2,7 @@
   "name": "image-clip-tool",
   "version": "0.0.1",
   "description": "An image crop and upload plugin",
-  "main": "index.js",
+  "main": "./dist/prod/image-clipper.dist.js",
   "scripts": {
     "dev": "webpack-dev-server --config build/webpack.dev.conf.js --mode development",
     "build": "webpack --config build/webpack.prod.conf.js --mode production"
