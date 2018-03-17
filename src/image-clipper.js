@@ -63,10 +63,10 @@ var $box = $(
 function ImageClipper(config) {
   this.title = config.title || "Please Select Image";
   this.maxFileSize = config.maxFileSize || (5 * 1024 * 1024);  // 5MB
-  if (isValidOutputFormmat(config.outputFormmat)) {
-    this.outputFormmat = config.outputFormmat;
+  if (isValidoutputFormat(config.outputFormat)) {
+    this.outputFormat = config.outputFormat;
   } else {
-    this.outputFormmat = "png";
+    this.outputFormat = "png";
   }
   this.task = config.callback || (function() {});
 
@@ -151,9 +151,9 @@ ImageClipper.prototype.Init = function() {
                   imageCutLength, imageCutLength,
                   0, 0, imageCutLength, imageCutLength);
 
-    var data = canvas.toDataURL("image/" + me.outputFormmat);
+    var data = canvas.toDataURL("image/" + me.outputFormat);
     // Convert base64 data to bytes.
-    var blob = b64ToBlob(data.split(",")[1], "image/" + me.outputFormmat);
+    var blob = b64ToBlob(data.split(",")[1], "image/" + me.outputFormat);
     me.task($input.val(), blob);
 
     $box.modal("hide");
@@ -637,7 +637,7 @@ ImageClipper.prototype.Init = function() {
 
 }
 
-function isValidOutputFormmat(formmat) {
+function isValidoutputFormat(formmat) {
   return formmat === "png" || formmat === "jpeg" || formmat === "bmp";
 }
 

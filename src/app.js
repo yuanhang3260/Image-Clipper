@@ -9,7 +9,7 @@ var clipper = new ImageClipper({
   callback: uploadImage,
 });
 
-function uploadImage(blob) {
+function uploadImage(filename, blob) {
   // Do something with the image blob.
   // e.g. send an AJAX to upload the image.
   // ...
