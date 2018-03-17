@@ -5,7 +5,8 @@
   "main": "./dist/prod/image-clipper.dist.js",
   "scripts": {
     "dev": "webpack-dev-server --config build/webpack.dev.conf.js --mode development",
-    "build": "webpack --config build/webpack.prod.conf.js --mode production"
+    "build": "webpack --config build/webpack.prod.conf.js --mode production",
+    "app": "webpack --config build/webpack.dev.conf.js --mode production"
   },
   "repository": {
     "type": "git",
