@@ -42,7 +42,7 @@ clipper.open();
 | outputFormmat | Output image formmat (`png`, `jpeg`, `bmp`).  |  string    |
 | callback      | Callback to process image data.               |  function  |
 
-The `callback` is of type `function(filename, blob)`, which takes filename and a Blob object of the cropped image area. Once`submit` button is clicked, this callback will be executed. Typically it should make a user-defined AJAX call to backend server:
+The `callback` is of type `function(filename, blob)`, which takes filename and a Blob object of the cropped image area. Once `submit` button is clicked, this callback will be executed. Typically it should make a user-defined AJAX call to backend server:
 
 ```javascript
 function uploadImage(filename, blob) {
